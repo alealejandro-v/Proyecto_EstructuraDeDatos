@@ -47,5 +47,34 @@ void menu(){
 }
 
 void crear(){
+	int numP;
+    char nombre[100], nombreArch[110];
+    char opc[5], pregunta[200], op1[100], op2[100], op3[100], op4[100];
+    float puntos;
 
+    FILE *archivoLista, *examen;
+
+    archivoLista = fopen("lista.txt", "a");
+    if (archivoLista == NULL){
+        printf("Error al abrir lista.txt\n");
+        return;
+    }
+
+    printf("Nombre del examen: ");
+    scanf("%s", nombre);
+    getchar();
+
+    fprintf(archivoLista, "%s\n", nombre);
+    fclose(archivoLista);
+
+    sprintf(nombreArch, "%s.txt", nombre); //abre un archivo segun el nombre que  le pongas en la corrida
+    examen = fopen(nombreArch, "w");
+    if (examen == NULL){
+        printf("Error al crear el archivo del examen.\n");
+        return;
+    }
+
+    printf("Cuantas preguntas desea agregar? ");
+    scanf("%d", &numP);
+    getchar();
 }
