@@ -39,7 +39,8 @@ void menu(){
 			case 1: crear();
 					break;
 					
-			case 2: break;
+			case 2: lista();
+					break;
 			case 3: break;
 			case 4: break;
 		}
@@ -77,4 +78,66 @@ void crear(){
     printf("Cuantas preguntas desea agregar? ");
     scanf("%d", &numP);
     getchar();
+
+	for (int i = 0; i < numP; i++){
+
+        printf("\nPregunta %d: ", i+1);
+        fgets(pregunta, 200, stdin);
+        pregunta[strcspn(pregunta, "\n")] = '\0'; // quitar salto de linea 
+
+        printf("Opcion 1: "); 
+		fgets(op1, 100, stdin); 
+		op1[strcspn(op1,"\n")] = '\0';
+		
+        printf("Opcion 2: "); 
+		fgets(op2, 100, stdin); 
+		op2[strcspn(op2,"\n")] = '\0';
+		
+        printf("Opcion 3: "); 
+		fgets(op3, 100, stdin); 
+		op3[strcspn(op3,"\n")] = '\0';
+		
+        printf("Opcion 4: "); 
+		fgets(op4, 100, stdin); 
+		op4[strcspn(op4,"\n")] = '\0';
+
+        printf("Respuesta correcta (op1/op2/op3/op4): ");
+        scanf("%s", opc);
+        getchar(); //tambien para qquitar asi como el enter pero este es para el scanf
+
+        printf("Puntos asignados: ");
+        scanf("%f", &puntos);
+        getchar();
+
+        fprintf(examen, ":p;%s\n",   pregunta);
+        fprintf(examen, ":op1;%s\n", op1);
+        fprintf(examen, ":op2;%s\n", op2);
+        fprintf(examen, ":op3;%s\n", op3);
+        fprintf(examen, ":op4;%s\n", op4);
+        fprintf(examen, ":r;%s\n",   opc);
+        fprintf(examen, "%.0f.\n",   puntos);
+    }
+
+    printf("\nExamen guardado correctamente!\n");
+    fclose(examen);
+}
+
+void lista(){
+    char nombre[100];
+    int cont = 1;
+
+    FILE *archivoLista = fopen("lista.txt", "r");
+    if (archivoLista == NULL){
+        printf("No hay examenes registrados.\n");
+        return;
+    }
+
+    printf("\n LISTA DE EXAMENES: \n");
+    while(fgets(nombre, 100, archivoLista) != NULL){
+        nombre[strcspn(nombre, "\n")] = '\0';
+        if(strlen(nombre) > 0)
+            printf("%d.- %s\n", cont++, nombre);
+    }
+    fclose(archivoLista);
+}
 }
