@@ -140,4 +140,76 @@ void lista(){
     }
     fclose(archivoLista);
 }
+
+Nodo* nuevoNodo(){
+    Nodo *n = (Nodo*)malloc(sizeof(Nodo));
+    n->ant = NULL;
+    n->sig = NULL;
+    return n;
+}
+
+void liberarLista(Nodo *cabeza){
+    Nodo *auxiliar;
+    while(cabeza){
+        auxiliar = cabeza->sig;
+        free(cabeza);
+        cabeza = auxiliar;
+    }
+}
+
+int cargarExamen(const char *nombreArch, Nodo **cabeza){
+    FILE *f = fopen(nombreArch, "r");
+    if (f == NULL) return 0;
+
+    *cabeza = NULL; // cabeza apunta al inicio de la lista
+    Nodo *cola = NULL; // cola es para insertar al final sin recorrer toda la lista
+    char linea[210];
+    int count = 0;
+
+    while(1){
+        Nodo *n = nuevoNodo();
+        int ok = 0;
+
+        // leer hasta encontrar :p o que llegue al final
+        while(fgets(linea, 210, f)){
+            linea[strcspn(linea,"\n")] = '\0';
+            if(strncmp(linea, ":p;", 3) == 0){
+                strcpy(n->pregunta, linea+3);
+                ok = 1;
+                break;
+            }
+        }
+        if(!ok){ free(n); break; }
+
+        if(fgets(linea,210,f)){ 
+			linea[strcspn(linea,"\n")]='\0'; strcpy(n->op1, linea+5); 
+		}
+        if(fgets(linea,210,f)){ 
+			linea[strcspn(linea,"\n")]='\0'; strcpy(n->op2, linea+5); 
+		}
+        if(fgets(linea,210,f)){ 
+			linea[strcspn(linea,"\n")]='\0'; strcpy(n->op3, linea+5); 
+		}
+        if(fgets(linea,210,f)){ 
+			linea[strcspn(linea,"\n")]='\0'; strcpy(n->op4, linea+5); 
+		}
+        if(fgets(linea,210,f)){ 
+			linea[strcspn(linea,"\n")]='\0'; strcpy(n->correcta, linea+3); 
+		}
+        if(fgets(linea,210,f)){ 
+			n->puntos = atof(linea); 
+		}
+
+        if(*cabeza == NULL){
+            *cabeza = n;
+            cola = n;
+        } else {
+            cola->sig = n;
+            n->ant    = cola;
+            cola      = n;
+        }
+        count++;
+    }
+    fclose(f);
+    return count;
 }
