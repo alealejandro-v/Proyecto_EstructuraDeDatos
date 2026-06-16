@@ -213,3 +213,143 @@ int cargarExamen(const char *nombreArch, Nodo **cabeza){
     fclose(f);
     return count;
 }
+
+void guardarExamen(const char *nombreArch, Nodo *cabeza){
+    FILE *f = fopen(nombreArch, "w");
+    if (f == NULL){ printf("Error al guardar.\n"); return; }
+
+    Nodo *actual = cabeza;
+    while(actual){
+        fprintf(f, ":p;%s\n",   actual->pregunta);
+        fprintf(f, ":op1;%s\n", actual->op1);
+        fprintf(f, ":op2;%s\n", actual->op2);
+        fprintf(f, ":op3;%s\n", actual->op3);
+        fprintf(f, ":op4;%s\n", actual->op4);
+        fprintf(f, ":r;%s\n",   actual->correcta);
+        fprintf(f, "%.0f.\n",   actual->puntos);
+        actual = actual->sig;
+    }
+    fclose(f);
+}
+
+
+
+
+
+
+void modificar(){
+    char nombre[100], nombreArch[110];
+    char tecla;
+
+    lista();
+    printf("\nNombre del examen a modificar: ");
+    scanf("%s", nombre);
+    getchar();
+
+    sprintf(nombreArch, "%s.txt", nombre);
+
+    Nodo *cabeza = NULL;
+    int total = cargarExamen(nombreArch, &cabeza);
+
+    if(total == 0){
+        printf("No se pudo cargar el examen o esta vacio.\n");
+        return;
+    }
+
+    Nodo *actual = cabeza;
+    int num = 1;
+
+    printf("\nNavega: [d] siguiente  [a] anterior  [e] editar  [s] guardar y salir\n");
+
+    do {
+        imprimirNodo(actual, num);
+        printf("\nOpcion: ");
+        scanf(" %c", &tecla);
+        getchar();
+
+        if(tecla == 'd'){
+            if(actual->sig){ actual = actual->sig; num++; }
+            else printf("Ya estas en la ultima pregunta.\n");
+
+        } else if(tecla == 'a'){
+            if(actual->ant){ actual = actual->ant; num--; }
+            else printf("Ya estas en la primera pregunta.\n");
+
+        } else if(tecla == 'e'){
+            printf("Nueva pregunta (Enter para dejar igual): ");
+            char tmp[200];
+            fgets(tmp, 200, stdin);
+            tmp[strcspn(tmp,"\n")] = '\0';
+            if(strlen(tmp) > 0) strcpy(actual->pregunta, tmp);
+
+            printf("op1: "); fgets(tmp,100,stdin); tmp[strcspn(tmp,"\n")]='\0';
+            if(strlen(tmp)>0) strcpy(actual->op1, tmp);
+            printf("op2: "); fgets(tmp,100,stdin); tmp[strcspn(tmp,"\n")]='\0';
+            if(strlen(tmp)>0) strcpy(actual->op2, tmp);
+            printf("op3: "); fgets(tmp,100,stdin); tmp[strcspn(tmp,"\n")]='\0';
+            if(strlen(tmp)>0) strcpy(actual->op3, tmp);
+            printf("op4: "); fgets(tmp,100,stdin); tmp[strcspn(tmp,"\n")]='\0';
+            if(strlen(tmp)>0) strcpy(actual->op4, tmp);
+
+            printf("Respuesta correcta (op1/op2/op3/op4): ");
+            scanf("%s", tmp); getchar();
+            if(strlen(tmp)>0) strcpy(actual->correcta, tmp);
+
+            printf("Puntos: ");
+            float p; scanf("%f",&p); getchar();
+            actual->puntos = p;
+
+            printf("Cambios aplicados.\n");
+        }
+
+    } while(tecla != 's');
+
+    guardarExamen(nombreArch, cabeza);
+    printf("Examen guardado correctamente.\n");
+    liberarLista(cabeza);
+}
+
+
+
+
+
+
+void eliminar(){
+    char nombre[100], nombreArch[110];
+
+    lista();
+    printf("\nNombre del examen a eliminar: ");
+    scanf("%s", nombre);
+    getchar();
+
+    sprintf(nombreArch, "%s.txt", nombre);
+
+    // el remove es para borrar el archivo del examen que elijas
+    if(remove(nombreArch) != 0){
+        printf("No se encontro el archivo %s\n", nombreArch);
+        return;
+    }
+
+    FILE *archivoLista = fopen("lista.txt", "r");
+    FILE *temporal     = fopen("temp.txt",  "w");
+
+    if(archivoLista == NULL || temporal == NULL){
+        printf("Error al actualizar la lista.\n");
+        return;
+    }
+
+    char linea[100];
+    while(fgets(linea, 100, archivoLista)){
+        linea[strcspn(linea,"\n")] = '\0';
+        if(strcmp(linea, nombre) != 0)
+            fprintf(temporal, "%s\n", linea);
+    }
+
+    fclose(archivoLista);
+    fclose(temporal);
+
+    remove("lista.txt");
+    rename("temp.txt", "lista.txt");
+
+    printf("Examen '%s' eliminado correctamente.\n", nombre);
+}
