@@ -232,10 +232,15 @@ void guardarExamen(const char *nombreArch, Nodo *cabeza){
     fclose(f);
 }
 
-
-
-
-
+void imprimirNodo(Nodo *n, int num){
+    printf("\n-- Pregunta %d --\n", num);
+    printf("P: %s\n",    n->pregunta);
+    printf("op1: %s\n",  n->op1);
+    printf("op2: %s\n",  n->op2);
+    printf("op3: %s\n",  n->op3);
+    printf("op4: %s\n",  n->op4);
+    printf("Correcta: %s  |  Puntos: %.0f\n", n->correcta, n->puntos);
+}
 
 void modificar(){
     char nombre[100], nombreArch[110];
@@ -309,10 +314,35 @@ void modificar(){
     liberarLista(cabeza);
 }
 
+void aplicar(){
+    char nombre[100], nombreArch[110];
+    char tecla, respuesta[5];
 
+    lista();
+    printf("\nNombre del examen a aplicar: ");
+    scanf("%s", nombre);
+    getchar();
 
+    sprintf(nombreArch, "%s.txt", nombre);
 
+    Nodo *cabeza = NULL;
+    int total = cargarExamen(nombreArch, &cabeza);
 
+    if(total == 0){
+        printf("No se pudo cargar el examen o esta vacio.\n");
+        return;
+    }
+
+    // guardar respuestas del alumno
+    // uso memoria dinamica porque no se cuantas preguntas tendra el examen
+    char **respuestas = (char**)malloc(total * sizeof(char*));
+    for(int i = 0; i < total; i++){
+        respuestas[i] = (char*)malloc(5 * sizeof(char));
+        strcpy(respuestas[i], "");
+    }
+
+    Nodo *actual = cabeza;
+    int num = 1;
 
 void eliminar(){
     char nombre[100], nombreArch[110];
