@@ -1,23 +1,39 @@
 /* 	PROYECTO - ESTRUCTURA DE DATOS
 	EXAMENES
-
 	Edgar Alejandro Vázquez Haro - 571846
 	Rany Rey Guzmán Esparza - 566297
 */
-
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+typedef struct Nodo {
+    char pregunta[200];
+    char op1[100];
+    char op2[100];
+    char op3[100];
+    char op4[100];
+    char correcta[5];   // op1,op2,op3,op4
+    float puntos;
+    struct Nodo *ant;
+    struct Nodo *sig;
+} Nodo;
 
 void menu();
 void crear();
 void lista();
 void modificar();
 void aplicar();
+void eliminar();
+
+Nodo* nuevoNodo();
+void liberarLista(Nodo *cabeza);
+int  cargarExamen(const char *nombreArch, Nodo **cabeza);
+void guardarExamen(const char *nombreArch, Nodo *cabeza);
+void imprimirNodo(Nodo *n, int num);
 
 int main(){
-	
 	menu();
-	
 	return 0;
 }
 
@@ -29,7 +45,8 @@ void menu(){
 	printf("Lista de examenes_________2\n");
 	printf("Modificar un examen_______3\n");
 	printf("Aplicar un examen_________4\n");
-	printf("Salir_____________________5\n");
+	printf("Eliminar un examen________5\n");
+	printf("Salir_____________________6\n");
 	
 		printf("Seleccione una opcion: ");
 		scanf("%d",&opc);
@@ -41,10 +58,14 @@ void menu(){
 					
 			case 2: lista();
 					break;
-			case 3: break;
-			case 4: break;
+			case 3: modificar();
+					break;
+			case 4: aplicar();
+					break;
+			case 5: eliminar();
+					break;
 		}
-	} while(opc != 5);
+	} while(opc != 6);
 }
 
 void crear(){
@@ -343,6 +364,62 @@ void aplicar(){
 
     Nodo *actual = cabeza;
     int num = 1;
+
+	 printf("\nNavega: [d] siguiente  [a] anterior  [f] finalizar examen\n");
+
+    do {
+        // mostrar pregunta
+        printf("\n-- Pregunta %d / %d --\n", num, total);
+        printf("P: %s\n",   actual->pregunta);
+        printf("op1: %s\n", actual->op1);
+        printf("op2: %s\n", actual->op2);
+        printf("op3: %s\n", actual->op3);
+        printf("op4: %s\n", actual->op4);
+
+        if(strlen(respuestas[num-1]) > 0)
+            printf("Tu respuesta actual: %s\n", respuestas[num-1]);
+        else
+            printf("Sin respuesta\n");
+
+        printf("Responde (op1/op2/op3/op4) o navega [d/a/f]: ");
+        scanf("%s", respuesta); 
+        getchar();
+
+        if(strcmp(respuesta,"d")==0){
+            if(actual->sig){ actual = actual->sig; num++; }
+            else printf("Ya estas en la ultima pregunta.\n");
+        } else if(strcmp(respuesta,"a")==0){
+            if(actual->ant){ actual = actual->ant; num--; }
+            else printf("Ya estas en la primera pregunta.\n");
+        } else if(strcmp(respuesta,"f")==0){
+            tecla = 'f';
+        } else if(strncmp(respuesta,"op",2)==0){
+            strcpy(respuestas[num-1], respuesta);
+            printf("Respuesta registrada.\n");
+        } else {
+            printf("Entrada no reconocida.\n");
+        }
+
+    } while(tecla != 'f');
+
+    float puntosObtenidos = 0, puntosTotal = 0;
+    Nodo *tmp = cabeza;
+    int i = 0;
+    while(tmp){
+        puntosTotal += tmp->puntos;
+        if(strcmp(respuestas[i], tmp->correcta) == 0)
+            puntosObtenidos += tmp->puntos;
+        tmp = tmp->sig;
+        i++;
+    }
+
+    printf("  RESULTADO DEL EXAMEN: \n");
+    printf("  Puntos obtenidos: %.0f / %.0f\n", puntosObtenidos, puntosTotal);
+
+    for(int j = 0; j < total; j++) free(respuestas[j]);
+    free(respuestas);
+    liberarLista(cabeza);
+}
 
 void eliminar(){
     char nombre[100], nombreArch[110];
